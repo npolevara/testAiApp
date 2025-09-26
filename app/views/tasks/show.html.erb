@@ -1,0 +1,187 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1>Task Details</h1>
+  <div class="d-flex gap-2">
+    <%= link_to "Edit", edit_task_path(@task), class: "btn btn-primary" %>
+    <%= link_to "Back to List", tasks_path, class: "btn btn-secondary" %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h3>Task #<%= @task.id %>: <%= @task.title %></h3>
+      </div>
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <strong>Status:</strong>
+            <% case @task.status %>
+            <% when 'To Do' %>
+              <span class="badge badge-secondary">To Do</span>
+            <% when 'In Progress' %>
+              <span class="badge badge-warning">In Progress</span>
+            <% when 'Done' %>
+              <span class="badge badge-success">Done</span>
+            <% end %>
+          </div>
+          <div class="col-md-6">
+            <strong>Priority:</strong>
+            <% case @task.priority %>
+            <% when 'High' %>
+              <span class="badge badge-danger">High</span>
+            <% when 'Medium' %>
+              <span class="badge badge-warning">Medium</span>
+            <% when 'Low' %>
+              <span class="badge badge-info">Low</span>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <strong>Assignee:</strong>
+            <%= @task.user.name %>
+          </div>
+          <div class="col-md-6">
+            <strong>Created Date:</strong>
+            <%= @task.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+          </div>
+        </div>
+
+        <% if @task.due_date %>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <strong>Due Date:</strong>
+            <%= @task.due_date.strftime("%B %d, %Y") %>
+            <% if @task.due_date < Date.current %>
+              <span class="badge badge-danger">Overdue</span>
+            <% elsif @task.due_date <= Date.current + 3.days %>
+              <span class="badge badge-warning">Due Soon</span>
+            <% end %>
+          </div>
+        </div>
+        <% end %>
+
+        <div class="mb-3">
+          <strong>Description:</strong>
+          <div class="mt-2">
+            <% if @task.description.present? %>
+              <p style="white-space: pre-wrap;"><%= @task.description %></p>
+            <% else %>
+              <p class="text-muted">No description provided.</p>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <strong>Quick Status Update:</strong>
+          <div class="mt-2 d-flex gap-2">
+            <% Task.statuses.each do |status| %>
+              <% if status != @task.status %>
+                <%= link_to status,
+                    task_path(@task, task: { status: status }),
+                    method: :patch,
+                    class: "btn btn-sm #{'btn-success' if status == 'Done'} #{'btn-warning' if status == 'In Progress'} #{'btn-secondary' if status == 'To Do'}",
+                    confirm: "Change status to #{status}?" %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="mt-4 d-flex gap-2">
+          <%= link_to "Delete Task",
+              task_path(@task),
+              method: :delete,
+              class: "btn btn-danger",
+              confirm: "Are you sure you want to delete '#{@task.title}'? This action cannot be undone." %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h4>Task History</h4>
+      </div>
+      <div class="card-body">
+        <% if @task_history.present? %>
+          <div class="timeline">
+            <% @task_history.each do |history_item| %>
+              <div class="timeline-item mb-3">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <strong><%= history_item[:event] %></strong><br>
+                  <small class="text-muted">
+                    by <%= history_item[:user] %><br>
+                    <%= history_item[:timestamp].strftime("%m/%d/%Y at %I:%M %p") %>
+                  </small>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-muted">No history available.</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -0.5rem;
+  }
+  .col-md-6 {
+    flex: 0 0 50%;
+    padding: 0.5rem;
+  }
+  .col-md-8 {
+    flex: 0 0 66.666667%;
+    padding: 0.5rem;
+  }
+  .col-md-4 {
+    flex: 0 0 33.333333%;
+    padding: 0.5rem;
+  }
+  .timeline {
+    position: relative;
+    padding-left: 1.5rem;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #dee2e6;
+  }
+  .timeline-item {
+    position: relative;
+  }
+  .timeline-marker {
+    position: absolute;
+    left: -2rem;
+    top: 0.25rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background-color: #007bff;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px #dee2e6;
+  }
+  .timeline-content {
+    background-color: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 0.25rem;
+    border-left: 3px solid #007bff;
+  }
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+  }
+</style>

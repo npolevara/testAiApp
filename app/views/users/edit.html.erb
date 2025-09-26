@@ -1,0 +1,120 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1>Edit User</h1>
+  <div class="d-flex gap-2">
+    <%= link_to "Back to Users", users_path, class: "btn btn-secondary" %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <%= form_with model: @user, local: true do |f| %>
+      <% if @user.errors.any? %>
+        <div class="alert alert-danger">
+          <h4><%= pluralize(@user.errors.count, "error") %> prohibited this user from being saved:</h4>
+          <ul style="margin-bottom: 0;">
+            <% @user.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="form-group">
+        <%= f.label :name, class: "form-label" %>
+        <span class="text-danger">*</span>
+        <%= f.text_field :name, class: "form-control", placeholder: "Enter full name (1-50 chars)", maxlength: 50 %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :email, class: "form-label" %>
+        <span class="text-danger">*</span>
+        <%= f.email_field :email, class: "form-control", placeholder: "Enter email address" %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :role, class: "form-label" %>
+        <span class="text-danger">*</span>
+        <%= f.select :role,
+            options_for_select([
+              ['Developer', 'Developer'],
+              ['Designer', 'Designer'],
+              ['QA', 'QA'],
+              ['Manager', 'Manager']
+            ], @user.role),
+            { prompt: "Select role" },
+            { class: "form-control" } %>
+      </div>
+
+      <div class="d-flex gap-2 mt-3">
+        <%= f.submit "Update User", class: "btn btn-success" %>
+        <%= link_to "Cancel", users_path, class: "btn btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<% if @user.tasks.any? %>
+<div class="card mt-3">
+  <div class="card-header">
+    <h4>Assigned Tasks (<%= @user.tasks.count %>)</h4>
+  </div>
+  <div class="card-body">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Task ID</th>
+          <th>Title</th>
+          <th>Status</th>
+          <th>Priority</th>
+          <th>Created Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @user.tasks.each do |task| %>
+          <tr>
+            <td>#<%= task.id %></td>
+            <td><%= link_to task.title, task_path(task) %></td>
+            <td>
+              <% case task.status %>
+              <% when 'To Do' %>
+                <span class="badge badge-secondary">To Do</span>
+              <% when 'In Progress' %>
+                <span class="badge badge-warning">In Progress</span>
+              <% when 'Done' %>
+                <span class="badge badge-success">Done</span>
+              <% end %>
+            </td>
+            <td>
+              <% case task.priority %>
+              <% when 'High' %>
+                <span class="badge badge-danger">High</span>
+              <% when 'Medium' %>
+                <span class="badge badge-warning">Medium</span>
+              <% when 'Low' %>
+                <span class="badge badge-info">Low</span>
+              <% end %>
+            </td>
+            <td><%= task.created_at.strftime("%m/%d/%Y") %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<% end %>
+
+<style>
+  .text-danger {
+    color: #dc3545 !important;
+  }
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  .table a {
+    text-decoration: none;
+    color: #007bff;
+  }
+  .table a:hover {
+    text-decoration: underline;
+  }
+</style>

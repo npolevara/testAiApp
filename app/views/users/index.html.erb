@@ -1,0 +1,174 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1>User Management</h1>
+</div>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h3>All Users</h3>
+      </div>
+      <div class="card-body">
+        <% if @users.present? %>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Assigned Tasks</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @users.each do |user| %>
+                <tr>
+                  <td><%= user.name %></td>
+                  <td><%= user.email %></td>
+                  <td>
+                    <% case user.role %>
+                    <% when 'Developer' %>
+                      <span class="badge badge-info">Developer</span>
+                    <% when 'Designer' %>
+                      <span class="badge badge-warning">Designer</span>
+                    <% when 'QA' %>
+                      <span class="badge badge-success">QA</span>
+                    <% when 'Manager' %>
+                      <span class="badge badge-secondary">Manager</span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <span class="badge badge-info"><%= user.assigned_tasks_count %></span>
+                  </td>
+                  <td>
+                    <div class="d-flex gap-2">
+                      <%= link_to "Edit", edit_user_path(user), class: "btn btn-sm btn-primary" %>
+                      <% if user.assigned_tasks_count == 0 %>
+                        <%= link_to "Delete",
+                            user_path(user),
+                            method: :delete,
+                            class: "btn btn-sm btn-danger",
+                            confirm: "Are you sure you want to delete #{user.name}?" %>
+                      <% else %>
+                        <span class="btn btn-sm btn-secondary" style="opacity: 0.5;" title="Cannot delete user with assigned tasks">Delete</span>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% else %>
+          <div class="text-center py-5">
+            <h3 class="text-muted">No users found</h3>
+            <p class="text-muted">Get started by adding your first user.</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h3>Add New User</h3>
+      </div>
+      <div class="card-body">
+        <%= form_with model: @new_user, local: true do |f| %>
+          <% if @new_user.errors.any? %>
+            <div class="alert alert-danger">
+              <h5><%= pluralize(@new_user.errors.count, "error") %> prohibited this user from being saved:</h5>
+              <ul style="margin-bottom: 0;">
+                <% @new_user.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <div class="form-group">
+            <%= f.label :name, class: "form-label" %>
+            <span class="text-danger">*</span>
+            <%= f.text_field :name, class: "form-control", placeholder: "Enter full name (1-50 chars)", maxlength: 50 %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :email, class: "form-label" %>
+            <span class="text-danger">*</span>
+            <%= f.email_field :email, class: "form-control", placeholder: "Enter email address" %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :role, class: "form-label" %>
+            <span class="text-danger">*</span>
+            <%= f.select :role,
+                options_for_select([
+                  ['Developer', 'Developer'],
+                  ['Designer', 'Designer'],
+                  ['QA', 'QA'],
+                  ['Manager', 'Manager']
+                ], @new_user.role),
+                { prompt: "Select role" },
+                { class: "form-control" } %>
+          </div>
+
+          <div class="d-flex gap-2 mt-3">
+            <%= f.submit "Add User", class: "btn btn-success" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-header">
+        <h4>User Statistics</h4>
+      </div>
+      <div class="card-body">
+        <div class="mb-2">
+          <strong>Total Users:</strong> <%= @users.count %>
+        </div>
+        <div class="mb-2">
+          <strong>Developers:</strong> <%= @users.where(role: 'Developer').count %>
+        </div>
+        <div class="mb-2">
+          <strong>Designers:</strong> <%= @users.where(role: 'Designer').count %>
+        </div>
+        <div class="mb-2">
+          <strong>QA:</strong> <%= @users.where(role: 'QA').count %>
+        </div>
+        <div class="mb-2">
+          <strong>Managers:</strong> <%= @users.where(role: 'Manager').count %>
+        </div>
+        <div class="mt-3">
+          <strong>Users with Tasks:</strong> <%= @users.joins(:tasks).distinct.count %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -0.5rem;
+  }
+  .col-md-8 {
+    flex: 0 0 66.666667%;
+    padding: 0.5rem;
+  }
+  .col-md-4 {
+    flex: 0 0 33.333333%;
+    padding: 0.5rem;
+  }
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+  }
+  .text-danger {
+    color: #dc3545 !important;
+  }
+  .form-group {
+    margin-bottom: 1rem;
+  }
+</style>

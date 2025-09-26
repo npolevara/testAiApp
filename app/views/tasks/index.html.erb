@@ -1,0 +1,116 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1>Task List</h1>
+  <%= link_to "Create New Task", new_task_path, class: "btn btn-success" %>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <%= form_with url: tasks_path, method: :get, local: true, class: "d-flex gap-2 align-items-center" do |f| %>
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= f.select :status, options_for_select(@filter_options.map { |s| [s, s] }, params[:status]),
+            { prompt: "Filter by Status" },
+            { class: "form-control", style: "width: auto;", onchange: "this.form.submit();" } %>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <%= f.text_field :search,
+            placeholder: "Search tasks (min 3 chars)",
+            value: params[:search],
+            class: "form-control",
+            style: "width: 300px;" %>
+      </div>
+
+      <%= f.submit "Search", class: "btn btn-primary" %>
+
+      <% if params[:search].present? || (params[:status].present? && params[:status] != 'All') %>
+        <%= link_to "Clear Filters", tasks_path, class: "btn btn-secondary" %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <% if @tasks.present? %>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Task ID</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>
+              <%= link_to "Priority",
+                  tasks_path(sort: 'priority', direction: (params[:sort] == 'priority' && params[:direction] == 'asc' ? 'desc' : 'asc'),
+                            status: params[:status], search: params[:search]),
+                  style: "text-decoration: none; color: inherit;" %>
+              <% if params[:sort] == 'priority' %>
+                <%= params[:direction] == 'desc' ? '↓' : '↑' %>
+              <% end %>
+            </th>
+            <th>Assignee</th>
+            <th>
+              <%= link_to "Created Date",
+                  tasks_path(sort: 'created_date', direction: (params[:sort] == 'created_date' && params[:direction] == 'asc' ? 'desc' : 'asc'),
+                            status: params[:status], search: params[:search]),
+                  style: "text-decoration: none; color: inherit;" %>
+              <% if params[:sort] == 'created_date' %>
+                <%= params[:direction] == 'desc' ? '↓' : '↑' %>
+              <% end %>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @tasks.each do |task| %>
+            <tr style="cursor: pointer;" onclick="window.location.href='<%= task_path(task) %>'">
+              <td>#<%= task.id %></td>
+              <td><%= task.title %></td>
+              <td>
+                <% case task.status %>
+                <% when 'To Do' %>
+                  <span class="badge badge-secondary">To Do</span>
+                <% when 'In Progress' %>
+                  <span class="badge badge-warning">In Progress</span>
+                <% when 'Done' %>
+                  <span class="badge badge-success">Done</span>
+                <% end %>
+              </td>
+              <td>
+                <% case task.priority %>
+                <% when 'High' %>
+                  <span class="badge badge-danger">High</span>
+                <% when 'Medium' %>
+                  <span class="badge badge-warning">Medium</span>
+                <% when 'Low' %>
+                  <span class="badge badge-info">Low</span>
+                <% end %>
+              </td>
+              <td><%= task.user.name %></td>
+              <td><%= task.created_at.strftime("%m/%d/%Y") %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="text-center py-5">
+        <h3 class="text-muted">No tasks found</h3>
+        <p class="text-muted">
+          <% if params[:search].present? || (params[:status].present? && params[:status] != 'All') %>
+            Try adjusting your search or filter criteria.
+          <% else %>
+            Get started by creating your first task.
+          <% end %>
+        </p>
+        <%= link_to "Create New Task", new_task_path, class: "btn btn-success" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+  .table tbody tr:hover {
+    background-color: #f8f9fa;
+  }
+  .table tbody tr {
+    transition: background-color 0.2s;
+  }
+</style>

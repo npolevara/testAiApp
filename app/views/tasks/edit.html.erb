@@ -1,0 +1,112 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1>Edit Task</h1>
+  <div class="d-flex gap-2">
+    <%= link_to "View Task", task_path(@task), class: "btn btn-secondary" %>
+    <%= link_to "Back to List", tasks_path, class: "btn btn-secondary" %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <%= form_with model: @task, local: true do |f| %>
+      <% if @task.errors.any? %>
+        <div class="alert alert-danger">
+          <h4><%= pluralize(@task.errors.count, "error") %> prohibited this task from being saved:</h4>
+          <ul style="margin-bottom: 0;">
+            <% @task.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="form-group">
+        <%= f.label :title, class: "form-label" %>
+        <span class="text-danger">*</span>
+        <%= f.text_field :title, class: "form-control", placeholder: "Enter task title (1-100 characters)", maxlength: 100 %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :description, class: "form-label" %>
+        <%= f.text_area :description, class: "form-control", rows: 4, placeholder: "Enter task description (optional, max 500 characters)", maxlength: 500 %>
+        <small class="text-muted">
+          <span id="char-count">0</span>/500 characters
+        </small>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :status, class: "form-label" %>
+        <span class="text-danger">*</span>
+        <%= f.select :status,
+            options_for_select(Task.statuses.map { |s| [s, s] }, @task.status),
+            { prompt: "Select status" },
+            { class: "form-control" } %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :priority, class: "form-label" %>
+        <span class="text-danger">*</span>
+        <%= f.select :priority,
+            options_for_select(Task.priorities.map { |p| [p, p] }, @task.priority),
+            { prompt: "Select priority" },
+            { class: "form-control" } %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :user_id, "Assignee", class: "form-label" %>
+        <span class="text-danger">*</span>
+        <%= f.select :user_id,
+            options_for_select(@users.map { |u| [u.name, u.id] }, @task.user_id),
+            { prompt: "Select assignee" },
+            { class: "form-control" } %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :due_date, class: "form-label" %>
+        <%= f.date_field :due_date, class: "form-control", min: Date.current %>
+        <small class="text-muted">Optional - Due date cannot be in the past</small>
+      </div>
+
+      <div class="d-flex gap-2 mt-3">
+        <%= f.submit "Update Task", class: "btn btn-success" %>
+        <%= link_to "Cancel", task_path(@task), class: "btn btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const descriptionField = document.querySelector('textarea[name="task[description]"]');
+    const charCount = document.getElementById('char-count');
+
+    if (descriptionField && charCount) {
+      function updateCharCount() {
+        charCount.textContent = descriptionField.value.length;
+        if (descriptionField.value.length > 450) {
+          charCount.style.color = '#dc3545';
+        } else if (descriptionField.value.length > 400) {
+          charCount.style.color = '#ffc107';
+        } else {
+          charCount.style.color = '#6c757d';
+        }
+      }
+
+      descriptionField.addEventListener('input', updateCharCount);
+      updateCharCount();
+    }
+  });
+</script>
+
+<style>
+  .text-danger {
+    color: #dc3545 !important;
+  }
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+  }
+</style>
