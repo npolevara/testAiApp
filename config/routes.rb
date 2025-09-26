@@ -5,7 +5,9 @@ Rails.application.routes.draw do
 
   get "dashboard", to: "dashboard#index"
 
-  resources :tasks
+  resources :tasks do
+    resources :comments, only: [:index, :create, :destroy]
+  end
 
   resources :users
 

@@ -1,5 +1,6 @@
 class User < ApplicationRecord
   has_many :tasks, dependent: :destroy
+  has_many :comments, dependent: :destroy
 
   validates :name, presence: true, length: { minimum: 1, maximum: 50 }
   validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }

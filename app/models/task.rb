@@ -1,5 +1,6 @@
 class Task < ApplicationRecord
   belongs_to :user
+  has_many :comments, dependent: :destroy
 
   validates :title, presence: true, length: { minimum: 1, maximum: 100 }
   validates :description, length: { maximum: 500 }, allow_blank: true
